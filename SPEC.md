@@ -177,8 +177,9 @@ and email, authenticates by magic link, and gets a team with a unique
 `join\_code` and a shareable join link.
 3. **Player join flow (the core).** Join link → name + email →
 magic link → roster entry created, with `roster\_max`, deadline/open-closed,
-domain restriction, and the one-team-per-league constraint all enforced. This
-slice must feel effortless; it is where the product's value lives.
+and the one-team-per-league constraint all enforced at the data layer. This
+slice must feel effortless; it is where the product's value lives. (Email
+**domain restriction** was cut from v1 — any email may join.)
 4. **Organizer dashboard.** All teams in a league with roster status
 (incomplete / full / over) and admission status (active / waitlisted), the
 waitlist shown in order with a manual-promote action, and CSV export of
