@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { requireOrganizer } from '@/lib/organizer'
 import { getOrigin } from '@/lib/origin'
 import { CopyField } from '@/components/CopyField'
+import { ActionForm } from '@/components/ActionForm'
 import {
   promoteTeam,
   toggleLeagueStatus,
@@ -115,7 +116,7 @@ export default async function LeaguePage({
                 {league.status}
               </span>
             </p>
-            <form action={toggleLeagueStatus} className="mt-2">
+            <ActionForm action={toggleLeagueStatus} className="mt-2">
               <input type="hidden" name="league_id" value={league.id} />
               <button
                 type="submit"
@@ -125,9 +126,9 @@ export default async function LeaguePage({
                   ? 'Close registration'
                   : 'Open registration'}
               </button>
-            </form>
+            </ActionForm>
           </div>
-          <form action={updateDeadline} className="flex items-end gap-2">
+          <ActionForm action={updateDeadline} className="flex items-end gap-2">
             <input type="hidden" name="league_id" value={league.id} />
             <label className="flex flex-col gap-1 text-sm font-medium">
               Deadline
@@ -144,7 +145,7 @@ export default async function LeaguePage({
             >
               Save
             </button>
-          </form>
+          </ActionForm>
         </div>
       </section>
 
@@ -196,7 +197,7 @@ export default async function LeaguePage({
                     >
                       {s.label}
                     </span>
-                    <form action={withdrawTeam}>
+                    <ActionForm action={withdrawTeam}>
                       <input type="hidden" name="team_id" value={t.id} />
                       <input type="hidden" name="league_id" value={league.id} />
                       <button
@@ -205,7 +206,7 @@ export default async function LeaguePage({
                       >
                         Withdraw
                       </button>
-                    </form>
+                    </ActionForm>
                   </div>
                 </li>
               )
@@ -249,7 +250,7 @@ export default async function LeaguePage({
                     >
                       {s.label}
                     </span>
-                    <form action={promoteTeam}>
+                    <ActionForm action={promoteTeam}>
                       <input type="hidden" name="team_id" value={t.id} />
                       <input type="hidden" name="league_id" value={league.id} />
                       <button
@@ -258,7 +259,7 @@ export default async function LeaguePage({
                       >
                         Promote
                       </button>
-                    </form>
+                    </ActionForm>
                   </div>
                 </li>
               )

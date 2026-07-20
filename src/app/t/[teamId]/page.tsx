@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getUser } from '@/lib/auth'
 import { getOrigin } from '@/lib/origin'
 import { CopyField } from '@/components/CopyField'
+import { ActionForm } from '@/components/ActionForm'
 import { removeRosterEntry } from '@/lib/actions/roster'
 
 export default async function TeamPage({
@@ -122,7 +123,7 @@ export default async function TeamPage({
                   </span>
                 )}
                 {canManage && !r.is_captain && (
-                  <form action={removeRosterEntry}>
+                  <ActionForm action={removeRosterEntry}>
                     <input type="hidden" name="entry_id" value={r.id} />
                     <input type="hidden" name="revalidate" value={`/t/${teamId}`} />
                     <button
@@ -131,7 +132,7 @@ export default async function TeamPage({
                     >
                       Remove
                     </button>
-                  </form>
+                  </ActionForm>
                 )}
               </div>
             </li>

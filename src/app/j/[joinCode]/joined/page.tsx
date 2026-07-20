@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/auth'
 import { removeRosterEntry } from '@/lib/actions/roster'
+import { ActionForm } from '@/components/ActionForm'
 
 export default async function JoinedPage({
   params,
@@ -61,7 +62,7 @@ export default async function JoinedPage({
           set on the roster and ready if a spot opens up.
         </p>
       )}
-      <form action={removeRosterEntry} className="mt-2">
+      <ActionForm action={removeRosterEntry} className="mt-2">
         <input type="hidden" name="entry_id" value={myEntryId} />
         <input
           type="hidden"
@@ -74,7 +75,7 @@ export default async function JoinedPage({
         >
           Leave this team
         </button>
-      </form>
+      </ActionForm>
     </main>
   )
 }
