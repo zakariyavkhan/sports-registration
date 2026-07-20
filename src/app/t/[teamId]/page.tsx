@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getUser } from '@/lib/auth'
 import { getOrigin } from '@/lib/origin'
 import { CopyField } from '@/components/CopyField'
+import { removeRosterEntry } from '@/lib/actions/roster'
 
 export default async function TeamPage({
   params,
@@ -9,12 +10,12 @@ export default async function TeamPage({
   params: Promise<{ teamId: string }>
 }) {
   const { teamId } = await params
-  const { supabase } = await getUser()
+  const { supabase, user } = await getUser()
 
   const { data: team } = await supabase
     .from('teams')
     .select(
-      'id, name, join_code, admission_status, waitlist_position, league_id, leagues(sport, division, roster_min, roster_max)'
+      'id, name, join_code, admission_status, waitlist_position, league_id, captain_email, leagues(sport, division, roster_min, roster_max, organizer_id)'
     )
     .eq('id', teamId)
     .single()
@@ -26,11 +27,17 @@ export default async function TeamPage({
     division: string
     roster_min: number
     roster_max: number
+    organizer_id: string
   }
+
+  const canManage =
+    !!user &&
+    (user.email?.toLowerCase() === team.captain_email.toLowerCase() ||
+      user.id === league.organizer_id)
 
   const { data: roster } = await supabase
     .from('roster_entries')
-    .select('player_name, player_email, is_captain')
+    .select('id, player_name, player_email, is_captain')
     .eq('team_id', teamId)
     .eq('status', 'confirmed')
     .order('is_captain', { ascending: false })
@@ -108,11 +115,25 @@ export default async function TeamPage({
                 <span className="font-medium">{r.player_name}</span>{' '}
                 <span className="text-zinc-500">{r.player_email}</span>
               </span>
-              {r.is_captain && (
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs font-medium text-white dark:bg-white dark:text-zinc-900">
-                  Captain
-                </span>
-              )}
+              <div className="flex items-center gap-3">
+                {r.is_captain && (
+                  <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs font-medium text-white dark:bg-white dark:text-zinc-900">
+                    Captain
+                  </span>
+                )}
+                {canManage && !r.is_captain && (
+                  <form action={removeRosterEntry}>
+                    <input type="hidden" name="entry_id" value={r.id} />
+                    <input type="hidden" name="revalidate" value={`/t/${teamId}`} />
+                    <button
+                      type="submit"
+                      className="text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                    >
+                      Remove
+                    </button>
+                  </form>
+                )}
+              </div>
             </li>
           ))}
           {!roster?.length && (

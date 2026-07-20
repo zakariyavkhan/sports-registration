@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/auth'
+import { removeRosterEntry } from '@/lib/actions/roster'
 
 export default async function JoinedPage({
   params,
@@ -7,13 +8,40 @@ export default async function JoinedPage({
   params: Promise<{ joinCode: string }>
 }) {
   const { joinCode } = await params
-  const supabase = await createClient()
+  const { supabase, user } = await getUser()
 
   const { data: rows } = await supabase.rpc('join_info', {
     p_join_code: joinCode,
   })
   const info = rows?.[0]
   if (!info) redirect('/')
+
+  // The player's own confirmed entry on this team (RLS returns only their own).
+  let myEntryId: string | null = null
+  if (user?.email) {
+    const { data: entry } = await supabase
+      .from('roster_entries')
+      .select('id')
+      .eq('team_id', info.team_id)
+      .eq('player_email', user.email)
+      .eq('status', 'confirmed')
+      .maybeSingle()
+    myEntryId = entry?.id ?? null
+  }
+
+  if (!myEntryId) {
+    return (
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-4 px-6 py-16">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          You&apos;ve left the roster
+        </h1>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          You&apos;re no longer on {info.team_name}. You can join another team in
+          this league if you&apos;d like.
+        </p>
+      </main>
+    )
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-4 px-6 py-16">
@@ -33,6 +61,20 @@ export default async function JoinedPage({
           set on the roster and ready if a spot opens up.
         </p>
       )}
+      <form action={removeRosterEntry} className="mt-2">
+        <input type="hidden" name="entry_id" value={myEntryId} />
+        <input
+          type="hidden"
+          name="revalidate"
+          value={`/j/${joinCode}/joined`}
+        />
+        <button
+          type="submit"
+          className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
+        >
+          Leave this team
+        </button>
+      </form>
     </main>
   )
 }

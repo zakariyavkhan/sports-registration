@@ -1,9 +1,25 @@
 'use server'
 
 import { headers } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { isRegistrationOpen } from '@/lib/auth'
 import type { MagicLinkState } from '@/lib/actions/auth'
+
+// Soft-remove a roster entry. RLS decides who may do it: the player
+// themselves, the team's captain, or the league's organizer.
+export async function removeRosterEntry(formData: FormData) {
+  const entryId = String(formData.get('entry_id') ?? '')
+  const revalidate = String(formData.get('revalidate') ?? '')
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('roster_entries')
+    .update({ status: 'removed' })
+    .eq('id', entryId)
+    .eq('status', 'confirmed')
+  if (error) throw new Error(error.message)
+  if (revalidate) revalidatePath(revalidate)
+}
 
 export async function sendPlayerMagicLink(
   _prev: MagicLinkState,

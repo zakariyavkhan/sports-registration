@@ -3,7 +3,12 @@ import { notFound } from 'next/navigation'
 import { requireOrganizer } from '@/lib/organizer'
 import { getOrigin } from '@/lib/origin'
 import { CopyField } from '@/components/CopyField'
-import { promoteTeam } from '@/lib/actions/organizer'
+import {
+  promoteTeam,
+  toggleLeagueStatus,
+  updateDeadline,
+  withdrawTeam,
+} from '@/lib/actions/organizer'
 
 function rosterStatus(confirmed: number, min: number, max: number) {
   if (confirmed > max)
@@ -100,6 +105,49 @@ export default async function LeaguePage({
         </div>
       </dl>
 
+      <section className="mt-8 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="text-sm font-semibold">Registration</h2>
+        <div className="mt-3 flex flex-wrap items-end gap-6">
+          <div>
+            <p className="text-sm text-zinc-500">
+              Currently{' '}
+              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                {league.status}
+              </span>
+            </p>
+            <form action={toggleLeagueStatus} className="mt-2">
+              <input type="hidden" name="league_id" value={league.id} />
+              <button
+                type="submit"
+                className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:border-zinc-500 dark:border-zinc-700 dark:hover:border-zinc-500"
+              >
+                {league.status === 'open'
+                  ? 'Close registration'
+                  : 'Open registration'}
+              </button>
+            </form>
+          </div>
+          <form action={updateDeadline} className="flex items-end gap-2">
+            <input type="hidden" name="league_id" value={league.id} />
+            <label className="flex flex-col gap-1 text-sm font-medium">
+              Deadline
+              <input
+                type="date"
+                name="reg_deadline"
+                defaultValue={league.reg_deadline}
+                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              />
+            </label>
+            <button
+              type="submit"
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:border-zinc-500 dark:border-zinc-700 dark:hover:border-zinc-500"
+            >
+              Save
+            </button>
+          </form>
+        </div>
+      </section>
+
       <section className="mt-8">
         <h2 className="text-sm font-semibold">Shareable registration link</h2>
         <p className="mb-3 mt-1 text-sm text-zinc-500">
@@ -148,6 +196,16 @@ export default async function LeaguePage({
                     >
                       {s.label}
                     </span>
+                    <form action={withdrawTeam}>
+                      <input type="hidden" name="team_id" value={t.id} />
+                      <input type="hidden" name="league_id" value={league.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md border border-red-300 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
+                      >
+                        Withdraw
+                      </button>
+                    </form>
                   </div>
                 </li>
               )
