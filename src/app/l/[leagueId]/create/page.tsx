@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getUser, isRegistrationOpen } from '@/lib/auth'
+import { Notice } from '@/components/Notice'
 
 export default async function CreateTeamPage({
   params,
@@ -79,24 +79,4 @@ export default async function CreateTeamPage({
   }
 
   redirect(`/t/${team.id}`)
-}
-
-function Notice({
-  title,
-  body,
-  href,
-}: {
-  title: string
-  body: string
-  href: string
-}) {
-  return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-4 px-6 py-16">
-      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">{body}</p>
-      <Link href={href} className="text-sm text-zinc-900 underline dark:text-zinc-100">
-        ← Back
-      </Link>
-    </main>
-  )
 }
